@@ -1,0 +1,34 @@
+<h1 class="page-title">Create Period</h1>
+<a class="btn btn-primary btn-sm" routerLink="/periods">Go back!</a>
+<br><br>
+
+<div class="alert alert-danger" *ngIf="errorMsg">
+    Error while creating - {{errorMessages[0]}}
+</div>
+
+<div class="alert alert-success" *ngIf="successMsg">
+    Period created
+</div>
+
+<form novalidate #form="ngForm" (submit)="createPeriod(form)">
+
+    <div class="mb-3">
+        <label for="walletId" class="form-label">Wallet</label>
+        <select name="walletId" class="form-control" [(ngModel)]="walletId" #periodWalletId="ngModel" required>
+            <option *ngFor="let wallet of wallets" [value]="wallet.id">
+                {{wallet.id + " - " + wallet.name}}
+            </option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label for="month" class="form-label">Month</label>
+        <input type="date" class="form-control" name="month" [(ngModel)]="month" #periodMonth="ngModel" required>
+    </div>
+    <div class="alert alert-danger" *ngIf="periodWalletId.errors?.['required'] && periodWalletId.touched">
+        Wallet is required
+    </div>
+    <div class="alert alert-danger" *ngIf="periodMonth.errors?.['required'] && periodMonth.touched">
+        Month is required
+    </div>
+    <button type="submit" class="btn btn-success" [disabled]="!form.valid">Create</button>
+</form>

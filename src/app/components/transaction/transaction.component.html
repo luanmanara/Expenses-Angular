@@ -1,0 +1,36 @@
+<h1 class="page-title text-center">Transactions</h1>
+<a class="btn btn-success" *ngIf="period && !period.isClosed" 
+                            [routerLink]="['/transactions/create']" 
+                            [queryParams]= "periodId != 0 ? { periodId: + periodId } : {}">Add a transaction</a>
+<br><br>
+
+<div class="alert alert-danger" *ngIf="errorMsg">
+    Error while creating - {{errorMessages[0]}}
+</div>
+
+<table class="table">
+    <thead class="table-light">
+        <tr bgColor="black">
+            <th scope="col">Id</th>
+            <th scope="col">Period</th>
+            <th scope="col">Value</th>
+            <th scope="col">Transaction Type</th>
+            <th scope="col">Description</th>
+            <th scope="col">Date Of Movement</th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let transaction of transactions;">
+            <th scope="row">{{transaction.id}}</th>
+            <td>{{transaction.periodId}}</td>
+            <td>{{transaction.value | currency:'BRL':'symbol'}}</td>
+            <td>{{transaction.transactionType}}</td>
+            <td>{{transaction.description}}</td>
+            <td>{{transaction.dateOfMovement  | date:'dd/MM/YYYY'}}</td>
+            <td><a *ngIf="!period.isClosed" class="btn btn-primary btn-sm" routerLink="edit" [queryParams]= "{ id: + transaction.id }">Edit</a></td>
+            <td><a *ngIf="!period.isClosed" class="btn btn-danger  btn-sm" (click)="deleteTransaction(transaction.id)">Delete</a></td>
+        </tr>
+    </tbody>
+</table>

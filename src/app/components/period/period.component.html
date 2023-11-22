@@ -1,0 +1,31 @@
+<h1 class="page-title text-center">Periods</h1>
+<a class="btn btn-success" [routerLink]="['/periods/create']" [queryParams]= "walletId != 0 ? { walletId: + walletId } : {}">Add a period</a>
+<br><br>
+
+<table class="table">
+    <thead class="table-light">
+        <tr bgColor="black">
+            <th scope="col">Id</th>
+            <th scope="col">Month</th>
+            <th scope="col">Wallet</th>
+            <th scope="col">Salary</th>
+            <th scope="col">Balance</th>
+            <th scope="col">Closed</th>
+            <th scope="col"></th>
+            <th scope="col"></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let period of periods;">
+            <th scope="row">{{period.id}}</th>
+            <td>{{period.month | date:'MMMM'}}</td>
+            <td>{{period.wallet?.name}}</td>
+            <td>{{period.salary | currency:'BRL':'symbol'}}</td>
+            <td>{{period.balance | currency:'BRL':'symbol'}}</td>
+            <td>{{period.isClosed ? 'Yes': 'No'}}</td>
+            <td><a [routerLink]="['/transactions']"
+                   [queryParams]= "{ periodId: + period.id}" class="btn btn-primary btn-sm">Transactions</a></td>
+            <td><a (click)="closePeriod(period.id)" *ngIf="!period.isClosed" class="btn btn-danger btn-sm">Close</a></td>
+        </tr>
+    </tbody>
+</table>

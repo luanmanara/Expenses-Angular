@@ -1,0 +1,23 @@
+<h1 class="page-title text-center">Wallets</h1>
+<a class="btn btn-success" routerLink="/wallets/create">Add a wallet</a>
+<br><br>
+
+<table class="table">
+    <thead class="table-light">
+        <tr bgColor="black">
+            <th scope="col">Id</th>
+            <th scope="col">Name</th>
+            <th scope="col">Saved</th>
+            <th scope="col"> </th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr *ngFor="let wallet of wallets;">
+            <th scope="row">{{wallet.id}}</th>
+            <td>{{wallet.name}}</td>
+            <td>{{wallet.saved | currency:'BRL':'symbol'}}</td>
+            <td><a [routerLink]="['/periods']"
+                   [queryParams]= "{ walletId: + wallet.id}" class="btn btn-primary btn-sm">Periods</a></td>
+        </tr>
+    </tbody>
+</table>

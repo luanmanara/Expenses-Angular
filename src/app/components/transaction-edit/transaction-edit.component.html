@@ -1,0 +1,63 @@
+<h1 class="page-title">Update Transaction</h1>
+<a class="btn btn-primary btn-sm" routerLink="/transactions">Go back!</a>
+<br><br>
+
+<div class="alert alert-danger" *ngIf="errorMsg">
+    Error while creating - {{errorMessages[0]}}
+</div>
+
+<div class="alert alert-success" *ngIf="successMsg">
+    Transaction created
+</div>
+
+<form novalidate #form="ngForm" (submit)="updateTransaction(form)">
+
+    <div class="mb-3">
+        <label for="periodId" class="form-label">Period</label>
+        <select name="periodId" class="form-control" [(ngModel)]="periodId" #transactionPeriodId="ngModel" required disabled>
+            <option [value]="periodId">
+                {{period.id + " - " + (period.month | date:'MMMM')}}
+            </option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="value" class="form-label">Value</label>
+        <input type="text" class="form-control" name="value" [(ngModel)]="value" #transactionValue="ngModel" required>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="transactionValue.errors?.['required'] && transactionValue.touched">
+        Value is required
+    </div>
+
+    <div class="mb-3">
+        <label for="transactionType" class="form-label">Transaction Type</label>
+        <select name="transactionType" class="form-control" [(ngModel)]="transactionType" #transactionT="ngModel" required disabled>
+            <option value="1">Crédito</option>
+            <option value="2">Débito</option>
+            <option value="3">Salário</option>
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label for="description" class="form-label">Description</label>
+        <input type="text" class="form-control" name="description" [(ngModel)]="description" #transactionDescription="ngModel" required>
+    </div>
+
+    <div class="alert alert-danger" *ngIf="transactionDescription.errors?.['required'] && transactionDescription.touched">
+        Description is required
+    </div>
+
+    <div class="mb-3">
+        <label for="dateOfMovement" class="form-label">Date Of Movement</label>
+        <input type="date" class="form-control" name="dateOfMovement" [(ngModel)]="dateOfMovement" #transactionDateOfMovement="ngModel" required>
+    </div>  
+
+    <div class="alert alert-danger" *ngIf="transactionDateOfMovement.errors?.['required'] && transactionDateOfMovement.touched">
+        Date Of Movement is required
+    </div>
+
+    <input type="hidden" name="id" [(ngModel)]="id">
+
+    <button type="submit" class="btn btn-success" [disabled]="!form.valid">Update</button>
+</form>

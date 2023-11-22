@@ -1,0 +1,30 @@
+<h1 class="page-title">Create Wallet</h1>
+<a class="btn btn-primary btn-sm" routerLink="/wallets">Go back!</a>
+<br><br>
+
+<div class="alert alert-danger" *ngIf="errorMsg">
+    Error while creating  - {{errorMessages[0]}}
+</div>
+
+<div class="alert alert-success" *ngIf="successMsg">
+    Wallet created
+</div>
+
+<form novalidate #form="ngForm" (submit)="createWallet(form)">
+    
+    <div class="mb-3">
+        <label for="name" class="form-label">Wallet Name</label>
+        <input type="text" class="form-control" name="name" [(ngModel)]="name" #walletName="ngModel" required>
+    </div>
+    <div class="mb-3">
+        <label for="saved" class="form-label">Saved</label>
+        <input type="number" class="form-control" name="saved" [(ngModel)]="saved" #walletSaved="ngModel" required>
+    </div>
+    <div class="alert alert-danger" *ngIf="walletName.errors?.['required'] && walletName.touched">
+        Name is required
+    </div>
+    <div class="alert alert-danger" *ngIf="walletSaved.errors?.['required'] && walletSaved.touched">
+        Saved is required
+    </div>
+    <button type="submit" class="btn btn-success" [disabled]="!form.valid">Create</button>
+</form>
