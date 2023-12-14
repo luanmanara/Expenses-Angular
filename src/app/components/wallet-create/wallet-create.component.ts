@@ -26,9 +26,16 @@ export class WalletCreateComponent implements OnInit {
       this.walletService.createWallet(form.value).subscribe(res => {
         if (res.isSuccess) {
           this.successMsg = true;
+          setTimeout(()=>{
+            this.successMsg = false;
+          }, 1000);
         } else {
           this.errorMsg = true;
           this.errorMessages = res.errorMessages;
+          setTimeout(()=>{
+            this.errorMsg = false;
+            this.errorMessages.pop();
+          }, 1000);
         }
       });
 

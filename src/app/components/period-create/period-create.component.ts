@@ -42,9 +42,16 @@ export class PeriodCreateComponent implements OnInit {
       next: (response) => {
         if(response.isSuccess){
           this.successMsg = true;
+          setTimeout(()=>{
+            this.successMsg = false;
+          }, 1000);
         }else {
           this.errorMsg = true;
           this.errorMessages.push(response.errorMessages[0]);
+          setTimeout(()=>{
+            this.errorMsg = false;
+            this.errorMessages.pop();
+          }, 1000);
         }
       }
     });

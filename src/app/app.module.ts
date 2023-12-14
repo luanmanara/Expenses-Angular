@@ -30,13 +30,13 @@ import { PeriodService } from './services/period.service';
     PeriodCreateComponent,
     TransactionComponent,
     TransactionCreateComponent,
-    TransactionEditComponent
+    TransactionEditComponent,
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
   ],
   providers: [WalletService, PeriodService, TransactionService, DatePipe],
   bootstrap: [AppComponent]
