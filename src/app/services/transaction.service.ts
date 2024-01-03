@@ -4,6 +4,7 @@ import { environment } from 'src/environments/environment';
 import { APIResponse } from '../_models/apiresponse';
 import { TransactionDTO } from '../_models/dto/transactionDTO';
 import { TransactionUpdateDTO } from '../_models/dto/transactionUpdateDTO';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,7 @@ import { TransactionUpdateDTO } from '../_models/dto/transactionUpdateDTO';
 export class TransactionService {
 
   private apiUrlEndpoint: string = environment.apiUrl + "transaction/";
+  public  transactionsBS = new BehaviorSubject<object|null>(null);
   
   constructor(private http : HttpClient) { }
 

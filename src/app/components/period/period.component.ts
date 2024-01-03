@@ -1,5 +1,5 @@
 import { HttpParams } from '@angular/common/http';
-import { Component, OnInit, resolveForwardRef } from '@angular/core';
+import { Component, OnInit, TemplateRef, resolveForwardRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PeriodService } from 'src/app/services/period.service';
 import { WalletService } from 'src/app/services/wallet.service';
@@ -11,7 +11,7 @@ import { PeriodUpdateDTO } from 'src/app/_models/dto/periodUpdateDTO';
   styleUrls: ['./period.component.css']
 })
 export class PeriodComponent implements OnInit {
-
+  
   periods : any;
   params: HttpParams = new HttpParams();
   walletId: number = 0;
@@ -53,18 +53,23 @@ export class PeriodComponent implements OnInit {
   }
 
   closePeriod(id: number){
-    const model: PeriodUpdateDTO = {
-      id: id,
-      isClosed: true
-    };
 
-    this.periodService.closePeriod(id, model).subscribe({
-      next: (response) => {
-        if(response.isSuccess){
-          this.ngOnInit();
+    const delConfirm: boolean = confirm('Are you sure you want to close this period?');
+
+    if(delConfirm) {
+      const model: PeriodUpdateDTO = {
+        id: id,
+        isClosed: true
+      };
+  
+      this.periodService.closePeriod(id, model).subscribe({
+        next: (response) => {
+          if(response.isSuccess){
+            this.ngOnInit();
+          }
         }
-      }
-    });
+      });
+    }
   }
 
 }

@@ -12,7 +12,7 @@ import { WalletService } from 'src/app/services/wallet.service';
 export class PeriodCreateComponent implements OnInit {
 
   month?: Date;
-  walletId?: number;
+  walletId: number = 0;
   wallets? :any;
 
   // error handling

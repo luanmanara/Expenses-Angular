@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { APIResponse } from '../_models/apiresponse';
 import { environment } from 'src/environments/environment';
 import { PeriodUpdateDTO } from '../_models/dto/periodUpdateDTO';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,7 @@ import { PeriodUpdateDTO } from '../_models/dto/periodUpdateDTO';
 export class PeriodService {
 
   private apiUrlEndpoint: string = environment.apiUrl + "period/";
+  public  periodsBS = new BehaviorSubject<object|null>(null);
   
   constructor(private http : HttpClient) { }
 

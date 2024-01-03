@@ -1,14 +1,27 @@
 <h1 class="page-title text-center">Transactions</h1>
-<a class="btn btn-success" *ngIf="period && !period.isClosed" 
-                            [routerLink]="['/transactions/create']" 
-                            [queryParams]= "periodId != 0 ? { periodId: + periodId } : {}">Add a transaction</a>
-<br><br>
+
+<div class="d-flex justify-content-between align-items-center">
+    <!-- <a class="btn btn-success" *ngIf="period && !period.isClosed" [routerLink]="['/transactions/create']"
+        [queryParams]="periodId != 0 ? { periodId: periodId } : {}">Add a transaction</a> -->
+
+    <a class="btn btn-success" *ngIf="period && !period.isClosed" (click)="openModal(template)">Add a transaction</a>
+
+    <div *ngIf="period" class="row">
+        <div class="col border"><span class="fw-bold">Balance:</span></div>
+        <div class="col border">{{period?.value.balance | currency:'BRL':'symbol'}}</div>
+        <div class="w-100"></div>
+        <div class="col border"><span class="fw-bold">Salary:</span></div>
+        <div class="col border">{{period?.value.salary | currency:'BRL':'symbol'}}</div>
+    </div>
+</div>
+
+<br>
 
 <div class="alert alert-danger" *ngIf="errorMsg">
     Error while creating - {{errorMessages[0]}}
 </div>
 
-<table class="table">
+<table class="table table-hover">
     <thead class="table-light">
         <tr bgColor="black">
             <th scope="col">Id</th>
@@ -22,15 +35,30 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let transaction of transactions;">
+        <tr *ngFor="let transaction of transactions?.value;" [ngClass]="{'table-success': transaction.transactionName == 'Crédito' || transaction.transactionName == 'Salário',
+                         'table-danger': transaction.transactionName == 'Débito'}">
             <th scope="row">{{transaction.id}}</th>
             <td>{{transaction.periodId}}</td>
             <td>{{transaction.value | currency:'BRL':'symbol'}}</td>
-            <td>{{transaction.transactionType}}</td>
+            <td>{{transaction.transactionName}}</td>
             <td>{{transaction.description}}</td>
-            <td>{{transaction.dateOfMovement  | date:'dd/MM/YYYY'}}</td>
-            <td><a *ngIf="!period.isClosed" class="btn btn-primary btn-sm" routerLink="edit" [queryParams]= "{ id: + transaction.id }">Edit</a></td>
-            <td><a *ngIf="!period.isClosed" class="btn btn-danger  btn-sm" (click)="deleteTransaction(transaction.id)">Delete</a></td>
+            <td>{{transaction.dateOfMovement | date:'dd/MM/YYYY'}}</td>
+            <td><a *ngIf="!period.isClosed" class="btn btn-primary btn-sm" routerLink="edit"
+                    [queryParams]="{ id: + transaction.id }">Edit</a></td>
+            <td><a *ngIf="!period.isClosed" class="btn btn-danger  btn-sm"
+                    (click)="deleteTransaction(transaction.id)">Delete</a></td>
         </tr>
     </tbody>
 </table>
+
+<ng-template #template>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Create Transaction</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+            <span aria-hidden="true">X</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <app-transaction-create [periodId]="periodId"></app-transaction-create>
+    </div>
+</ng-template>

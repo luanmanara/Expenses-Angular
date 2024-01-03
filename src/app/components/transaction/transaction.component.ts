@@ -1,8 +1,9 @@
 import { HttpParams } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PeriodService } from 'src/app/services/period.service';
 import { TransactionService } from 'src/app/services/transaction.service';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 
 @Component({
   selector: 'app-transaction',
@@ -10,6 +11,9 @@ import { TransactionService } from 'src/app/services/transaction.service';
   styleUrls: ['./transaction.component.css']
 })
 export class TransactionComponent implements OnInit {
+
+  //Modal
+  modalRef: BsModalRef = new BsModalRef();
 
   // error handling
   errorMsg: boolean = false;
@@ -22,7 +26,8 @@ export class TransactionComponent implements OnInit {
 
   constructor(private transactionService: TransactionService,
               private route             : ActivatedRoute,
-              private periodService     : PeriodService) { }
+              private periodService     : PeriodService,
+              private modalService      : BsModalService) { }
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(param => {
@@ -32,7 +37,8 @@ export class TransactionComponent implements OnInit {
         this.periodId = param['periodId'];
         
         this.periodService.getPeriod(this.periodId).subscribe(res => {
-          this.period = res.result;
+          this.periodService.periodsBS.next(res.result);
+          this.period = this.periodService.periodsBS;
         });
 
       }else{
@@ -42,20 +48,8 @@ export class TransactionComponent implements OnInit {
       this.transactionService.getTransactions(this.params).subscribe({
         next: (response) => {
           if(response.isSuccess){
-            this.transactions = response.result;
-            for(let t of this.transactions){
-              switch(t.transactionType){
-                case 1:
-                  t.transactionType = 'Crédito';
-                  break;
-                case 2:
-                  t.transactionType = 'Débito';
-                  break;
-                case 3:
-                  t.transactionType = 'Salário';
-                  break;
-              }
-            }
+            this.transactionService.transactionsBS.next(response.result);
+            this.transactions = this.transactionService.transactionsBS;
           }
         }
       });
@@ -63,13 +57,20 @@ export class TransactionComponent implements OnInit {
   }
 
   deleteTransaction(id: number){
-    let delConfirm: boolean = confirm('Are you sure you want to delete this transaction?');
+    const delConfirm: boolean = confirm('Are you sure you want to delete this transaction?');
 
     if(delConfirm){
       this.transactionService.deleteTransaction(id).subscribe({
         next: (response) => {
           if(response.isSuccess){
-            this.ngOnInit();
+            this.transactionService.getTransactions(this.params).subscribe(res => {
+              this.transactionService.transactionsBS.next(res.result);
+            });
+
+            this.periodService.getPeriod(this.periodId).subscribe(res => {
+              this.periodService.periodsBS.next(res.result);
+            });
+
           }else{
             this.errorMsg = true;
             this.errorMessages.push(response.errorMessages[0]);
@@ -77,5 +78,9 @@ export class TransactionComponent implements OnInit {
         }
       });
     }
+  }
+
+  openModal(template: TemplateRef<any>) {
+    this.modalRef = this.modalService.show(template);
   }
 }

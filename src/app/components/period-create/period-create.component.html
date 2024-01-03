@@ -1,5 +1,5 @@
 <h1 class="page-title">Create Period</h1>
-<a class="btn btn-primary btn-sm" routerLink="/periods">Go back!</a>
+<a class="btn btn-primary btn-sm" routerLink="/periods" [queryParams]= "{ walletId: + walletId}">Go back!</a>
 <br><br>
 
 <div class="alert alert-danger" *ngIf="errorMsg">

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -19,6 +20,13 @@ import { TransactionEditComponent } from './components/transaction-edit/transact
 import { DatePipe } from '@angular/common';
 import { TransactionService } from './services/transaction.service';
 import { PeriodService } from './services/period.service';
+import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
+
+// Bootstrap
+import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
+import { TooltipModule } from 'ngx-bootstrap/tooltip';
+import { ModalModule, BsModalService } from 'ngx-bootstrap/modal';
+import { CollapseModule } from 'ngx-bootstrap/collapse';
 
 @NgModule({
   declarations: [
@@ -34,11 +42,18 @@ import { PeriodService } from './services/period.service';
   ],
   imports: [
     BrowserModule,
+    BrowserAnimationsModule,
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
+    NgxMaskDirective, 
+    NgxMaskPipe,
+    BsDropdownModule.forRoot(),
+    TooltipModule.forRoot(),
+    ModalModule.forRoot(),
+    CollapseModule.forRoot()
   ],
-  providers: [WalletService, PeriodService, TransactionService, DatePipe],
+  providers: [WalletService, PeriodService, TransactionService, DatePipe, provideNgxMask(), BsModalService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
