@@ -1,9 +1,10 @@
 import { HttpParams } from '@angular/common/http';
-import { Component, OnInit, TemplateRef } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { PeriodService } from 'src/app/services/period.service';
 import { TransactionService } from 'src/app/services/transaction.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { GenericModalComponent } from '../generic-modal/generic-modal.component';
 
 @Component({
   selector: 'app-transaction',
@@ -12,6 +13,9 @@ import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 })
 export class TransactionComponent implements OnInit {
 
+  @ViewChild('modalCreate') modalCreate?: GenericModalComponent;
+  @ViewChild('modalEdit') modalEdit?: GenericModalComponent;
+  
   //Modal
   modalRef: BsModalRef = new BsModalRef();
 
@@ -23,6 +27,7 @@ export class TransactionComponent implements OnInit {
   params: HttpParams = new HttpParams();
   periodId: number = 0;
   period?: any;
+  editTransactionId: number = 0;
 
   constructor(private transactionService: TransactionService,
               private route             : ActivatedRoute,
@@ -80,7 +85,20 @@ export class TransactionComponent implements OnInit {
     }
   }
 
-  openModal(template: TemplateRef<any>) {
-    this.modalRef = this.modalService.show(template);
+  openModalCreate(){
+    if(this.modalCreate && this.modalCreate.template) {
+      this.modalRef = this.modalService.show(this.modalCreate.template);
+      this.modalCreate.hideModal = this.modalRef.hide;
+    }
+
+  }
+
+  openModalEdit(id: number){
+    if(this.modalEdit && this.modalEdit.template) {
+      this.modalRef = this.modalService.show(this.modalEdit.template);
+      this.editTransactionId = id;
+      this.modalEdit.hideModal = this.modalRef.hide;
+    }
+
   }
 }

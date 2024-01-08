@@ -1,6 +1,6 @@
-import { DatePipe, formatDate } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TransactionUpdateDTO } from 'src/app/_models/dto/transactionUpdateDTO';
@@ -12,10 +12,12 @@ import { TransactionService } from 'src/app/services/transaction.service';
   templateUrl: './transaction-edit.component.html',
   styleUrls: ['./transaction-edit.component.css']
 })
-export class TransactionEditComponent implements OnInit {
+export class TransactionEditComponent implements OnInit, OnChanges {
+
+  @Input() transactionId: number = 0;
 
   id: number = 0;
-  periodId?: number;
+  periodId: number = 0;
   value?: number;
   transactionType?: number;
   description?: string;
@@ -33,12 +35,13 @@ export class TransactionEditComponent implements OnInit {
               private periodService     : PeriodService,
               private router: Router) { }
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if(changes['transactionId']){
+      this.getTransaction(this.transactionId);
+    }
+  }
+
   ngOnInit(): void {
-    this.route.queryParams.subscribe({
-      next: async (param) => {
-        this.getTransaction(param['id']);        
-      }
-    });
   }
 
   updateTransaction(form: NgForm){
@@ -46,20 +49,34 @@ export class TransactionEditComponent implements OnInit {
     this.transactionService.updateTransaction(model.id, model).subscribe({
       next: (response) => {
         if(response.isSuccess){
+          
+          // parameters to search for the period transactions and update BS
+          let transactionParams: HttpParams = new HttpParams();
+          transactionParams = transactionParams.set('periodId', this.periodId);
+          this.transactionService.getTransactions(transactionParams).subscribe(response => {
+            this.transactionService.transactionsBS.next(response.result);
+          });
+
+          this.periodService.getPeriod(this.periodId).subscribe(res => {
+            this.periodService.periodsBS.next(res.result);
+          });
+
           this.successMsg = true;
+          
+          setTimeout(() =>{ this.successMsg = false; }, 1000);
+
         }else {
           this.errorMsg = true;
           this.errorMessages.push(response.errorMessages[0]);
+
+          setTimeout(() => { this.errorMsg = false; this.errorMessages.pop(); }, 1000);
         }
-      },
-      complete: () => {
-        this.router.navigate(['/transactions'], {queryParams: {periodId: this.periodId}});
       }
     });
   }
 
   getTransaction(id: number) {
-    if(id != 0){
+    if(id){
       this.transactionService.getTransaction(id).subscribe({
         next: (response) => {
           if(response.isSuccess && response.statusCode == 200){

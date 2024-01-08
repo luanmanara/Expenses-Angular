@@ -1,6 +1,10 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { DatePipe } from '@angular/common';
+import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
+import { FormsModule } from '@angular/forms';
+import { HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -8,19 +12,18 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 
 // Services
 import { WalletService } from './services/wallet.service';
+import { TransactionService } from './services/transaction.service';
+import { PeriodService } from './services/period.service';
+
+//Components
 import { WalletComponent } from './components/wallet/wallet.component';
-import { HttpClientModule } from '@angular/common/http';
 import { WalletCreateComponent } from './components/wallet-create/wallet-create.component';
-import { FormsModule } from '@angular/forms';
 import { PeriodComponent } from './components/period/period.component';
 import { PeriodCreateComponent } from './components/period-create/period-create.component';
 import { TransactionComponent } from './components/transaction/transaction.component';
 import { TransactionCreateComponent } from './components/transaction-create/transaction-create.component';
 import { TransactionEditComponent } from './components/transaction-edit/transaction-edit.component';
-import { DatePipe } from '@angular/common';
-import { TransactionService } from './services/transaction.service';
-import { PeriodService } from './services/period.service';
-import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
+import { GenericModalComponent } from './components/generic-modal/generic-modal.component';
 
 // Bootstrap
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
@@ -39,6 +42,7 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
     TransactionComponent,
     TransactionCreateComponent,
     TransactionEditComponent,
+    GenericModalComponent,
   ],
   imports: [
     BrowserModule,

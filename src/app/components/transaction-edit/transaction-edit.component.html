@@ -1,13 +1,9 @@
-<h1 class="page-title">Update Transaction</h1>
-<a class="btn btn-primary btn-sm" routerLink="/transactions">Go back!</a>
-<br><br>
-
 <div class="alert alert-danger" *ngIf="errorMsg">
     Error while creating - {{errorMessages[0]}}
 </div>
 
 <div class="alert alert-success" *ngIf="successMsg">
-    Transaction created
+    Transaction updated
 </div>
 
 <form novalidate #form="ngForm" (submit)="updateTransaction(form)">
@@ -23,7 +19,7 @@
 
     <div class="mb-3">
         <label for="value" class="form-label">Value</label>
-        <input type="text" class="form-control" name="value" [(ngModel)]="value" #transactionValue="ngModel" required>
+        <input prefix="R$" mask="separator.2" thousandSeparator="," type="text" class="form-control" name="value" [(ngModel)]="value" #transactionValue="ngModel" required>
     </div>
 
     <div class="alert alert-danger" *ngIf="transactionValue.errors?.['required'] && transactionValue.touched">

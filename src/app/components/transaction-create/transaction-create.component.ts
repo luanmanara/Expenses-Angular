@@ -1,7 +1,6 @@
 import { HttpParams } from '@angular/common/http';
 import { Component, OnInit, Input } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { PeriodService } from 'src/app/services/period.service';
 import { TransactionService } from 'src/app/services/transaction.service';
 
@@ -28,8 +27,7 @@ export class TransactionCreateComponent implements OnInit {
   errorMessages: Array<string> = [];
 
   constructor(private transactionService: TransactionService,
-              private periodService     : PeriodService,
-              private route             : ActivatedRoute) { }
+              private periodService     : PeriodService) { }
 
   ngOnInit(): void {
     if(!this.periodId) {
@@ -68,17 +66,14 @@ export class TransactionCreateComponent implements OnInit {
 
           // handle the success messages
           this.successMsg = true;
-          setTimeout(() =>{
-            this.successMsg = false;
-          }, 1000);
+
+          setTimeout(() =>{ this.successMsg = false; }, 1000);
 
         }else {
           this.errorMsg = true;
           this.errorMessages.push(response.errorMessages[0]);
-          setTimeout(()=>{
-            this.errorMsg = false;
-            this.errorMessages.pop();
-          }, 1000);
+          
+          setTimeout(() => { this.errorMsg = false; this.errorMessages.pop(); }, 1000);
         }
       }
     });

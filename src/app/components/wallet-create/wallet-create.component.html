@@ -14,11 +14,11 @@
     
     <div class="mb-3">
         <label for="name" class="form-label">Wallet Name</label>
-        <input type="text" class="form-control" name="name" [(ngModel)]="name" #walletName="ngModel" required>
+        <input type="text" class="form-control" name="name" id="name" [(ngModel)]="name" #walletName="ngModel" required>
     </div>
     <div class="mb-3">
         <label for="saved" class="form-label">Saved</label>
-        <input type="number" class="form-control" name="saved" [(ngModel)]="saved" #walletSaved="ngModel" required>
+        <input type="number" class="form-control" name="saved" id="saved" [(ngModel)]="saved" #walletSaved="ngModel" required>
     </div>
     <div class="alert alert-danger" *ngIf="walletName.errors?.['required'] && walletName.touched">
         Name is required
