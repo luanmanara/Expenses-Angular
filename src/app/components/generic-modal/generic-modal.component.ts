@@ -1,5 +1,4 @@
-import { Component, ElementRef, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { Component, Input, TemplateRef, ViewChild } from '@angular/core';
 
 @Component({
   selector: 'app-generic-modal',
@@ -10,7 +9,7 @@ export class GenericModalComponent {
 
     @Input() title: string = '';
 
-    @ViewChild('template') template?: string | TemplateRef<any>;
+    @ViewChild('template') template?: TemplateRef<any>;
 
     hideModal: Function = () => {};
 }
