@@ -14,6 +14,7 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 import { WalletService } from './services/wallet.service';
 import { TransactionService } from './services/transaction.service';
 import { PeriodService } from './services/period.service';
+import { UserService } from './services/user.service';
 
 //Components
 import { WalletComponent } from './components/wallet/wallet.component';
@@ -24,6 +25,8 @@ import { TransactionComponent } from './components/transaction/transaction.compo
 import { TransactionCreateComponent } from './components/transaction-create/transaction-create.component';
 import { TransactionEditComponent } from './components/transaction-edit/transaction-edit.component';
 import { GenericModalComponent } from './components/generic-modal/generic-modal.component';
+import { UserLoginComponent } from './components/user-login/user-login.component';
+import { UserRegisterComponent } from './components/user-register/user-register.component';
 
 // Bootstrap
 import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
@@ -43,6 +46,8 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
     TransactionCreateComponent,
     TransactionEditComponent,
     GenericModalComponent,
+    UserLoginComponent,
+    UserRegisterComponent
   ],
   imports: [
     BrowserModule,
@@ -57,7 +62,7 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
     ModalModule.forRoot(),
     CollapseModule.forRoot()
   ],
-  providers: [WalletService, PeriodService, TransactionService, DatePipe, provideNgxMask(), BsModalService],
+  providers: [WalletService, PeriodService, TransactionService, UserService, DatePipe, provideNgxMask(), BsModalService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

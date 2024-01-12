@@ -6,10 +6,13 @@
             (click)="isCollapsed = !isCollapsed">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse" id="navbarNavAltMarkup" [collapse]="isCollapsed">
+        <div class="collapse navbar-collapse justify-content-between" id="navbarNavAltMarkup" [collapse]="isCollapsed">
             <div class="navbar-nav">
                 <a class="nav-link active" aria-current="page" routerLink="/wallets">Wallets</a>
-                <!-- <a class="nav-link active" aria-current="page" routerLink="/periods">Periods</a> -->
+            </div>
+            <div class="navbar-nav">
+                <a role='button' class="nav-link active pointer" aria-current="page" (click)="logout()" *ngIf="isLoggedIn.value">Logout</a>
+                <a class="nav-link active " aria-current="page" routerLink="/login" *ngIf="!isLoggedIn.value">Log in</a>
             </div>
         </div>
     </div>
