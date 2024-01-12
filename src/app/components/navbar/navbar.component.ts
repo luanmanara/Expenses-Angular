@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { UserService } from 'src/app/services/user.service';
 
 @Component({
   selector: 'app-navbar',
@@ -8,10 +10,22 @@ import { Component, OnInit } from '@angular/core';
 export class NavbarComponent implements OnInit {
 
   isCollapsed : boolean = true;
+  isLoggedIn  : any;
 
-  constructor() {}
+  constructor(private userSerive: UserService,
+              private router    : Router) {}
 
   ngOnInit(): void {
+    this.isLoggedIn = this.userSerive.isLoggedIn;
+  }
+
+  logout(){
+    if (this.userSerive.isLoggedIn.value){
+      this.userSerive.currentUserBS.next(null);
+      this.userSerive.isLoggedIn.next(false);
+      this.router.navigate(['/login']);
+    }
+
   }
 
 }

@@ -1,0 +1,77 @@
+<section class="vh-100 gradient-custom">
+    <div class="container py-5 h-100">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+                <div class="card bg-dark text-white" style="border-radius: 1rem;">
+                    <div class="card-body p-5 text-center">
+
+                        <form class="mb-md-5 mt-md-4 pb-5" novalidate #form="ngForm" (submit)="register(form)">
+
+                            <h2 class="fw-bold mb-2 text-uppercase">Register</h2>
+                            <p class="text-white-50 mb-5">Please create your account!</p>
+
+                            <div class="form-floating mb-4 text-dark">
+                                <input type="email" id="username" name="username" class="form-control"
+                                    [(ngModel)]="username" #registerUsername="ngModel" email="true"
+                                    placeholder="name@example.com"
+                                    [ngClass]="registerUsername.errors?.['required'] && registerUsername.touched ? 'is-invalid' : ''"
+                                    [ngClass]="registerUsername.errors?.['email'] && registerUsername.touched ? 'is-invalid' : ''"
+                                    required />
+                                <label for="username">Email</label>
+                                <div *ngIf="registerUsername.errors?.['required'] && registerUsername.touched"
+                                    id="usernameValidation" class="invalid-feedback">
+                                    Email is required.
+                                </div>
+                                <div *ngIf="registerUsername.errors?.['email'] && registerUsername.touched"
+                                    id="usernameValidation" class="invalid-feedback">
+                                    Email is invalid.
+                                </div>
+                            </div>
+
+                            <div class="form-floating mb-4 text-dark">
+                                <input type="password" id="password" name="password" class="form-control"
+                                    [(ngModel)]="password" #registerPassword="ngModel" placeholder="Your password"
+                                    [ngClass]="registerPassword.errors?.['required'] && registerPassword.touched ? 'is-invalid' : ''"
+                                    required />
+                                <label for="password">Password</label>
+                                <div id="passwordValidation" class="invalid-feedback">
+                                    Password is required.
+                                </div>
+                            </div>
+
+                            <div class="form-floating mb-4 text-dark">
+                                <input type="password" id="repeatPassword" name="repeatPassword" class="form-control"
+                                    [(ngModel)]="repeatPassword" #registerRepeatPassword="ngModel"
+                                    placeholder="Repeat Your password"
+                                    [ngClass]="(registerRepeatPassword.errors?.['required'] && registerRepeatPassword.touched) ? 'is-invalid' : ''"
+                                    [ngClass]="(registerRepeatPassword.touched && registerPassword.touched) && registerRepeatPassword.value != registerPassword.value ? 'is-invalid' : ''"
+                                    required />
+                                <label for="repeatPassword">Repeat password</label>
+                                <div *ngIf="registerRepeatPassword.errors?.['required'] && registerRepeatPassword.touched"
+                                    id="passwordValidation" class="invalid-feedback">
+                                    Repeat Your password is required.
+                                </div>
+                                <div *ngIf="(registerRepeatPassword.touched && registerPassword.touched) && registerRepeatPassword.value != registerPassword.value"
+                                    id="passwordValidation" class="invalid-feedback">
+                                    Passwords do not match.
+                                </div>
+                            </div>
+
+                            <div class="alert alert-danger" *ngIf="errorMsg">
+                                <p *ngFor="let message of errorMessages">{{message}}</p>
+                            </div>
+
+                            <button type="submit" class="btn btn-outline-light btn-lg px-5"
+                                [disabled]="!form.valid">Register</button>
+                        </form>
+
+                        <div>
+                            <p class="mb-0">Already registered? <a routerLink="/login" class="text-white-50 fw-bold">Sign in</a></p>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

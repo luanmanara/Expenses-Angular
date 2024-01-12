@@ -1,7 +1,9 @@
+import { HttpParams } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { PeriodService } from 'src/app/services/period.service';
+import { UserService } from 'src/app/services/user.service';
 import { WalletService } from 'src/app/services/wallet.service';
 
 @Component({
@@ -14,6 +16,7 @@ export class PeriodCreateComponent implements OnInit {
   month?: Date;
   walletId: number = 0;
   wallets? :any;
+  httpParams: HttpParams = new HttpParams();
 
   // error handling
   errorMessages: Array<string> = [];
@@ -22,19 +25,24 @@ export class PeriodCreateComponent implements OnInit {
 
   constructor(private periodService: PeriodService,
               private walletService: WalletService,
-              private route        : ActivatedRoute) { }
+              private route        : ActivatedRoute,
+              private userService  : UserService) { }
 
   ngOnInit(): void {
-    this.walletService.getWallets().subscribe({
-      next: (response) => {
-        this.wallets = response.result;
-      },
-      complete: () => {
-        this.route.queryParams.subscribe(param => {
-          this.walletId = param['walletId'];
-        });
-      }
-    });
+    if (this.userService.currentUserBS.value) {
+      this.httpParams = this.httpParams.set("userId", this.userService.currentUserBS.value?.user.id);
+      
+      this.walletService.getWallets(this.httpParams).subscribe({
+        next: (response) => {
+          this.wallets = response.result;
+        },
+        complete: () => {
+          this.route.queryParams.subscribe(param => {
+            this.walletId = param['walletId'];
+          });
+        }
+      });
+    }
   }
 
   createPeriod(form: NgForm){
