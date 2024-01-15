@@ -1,10 +1,11 @@
 import { HttpParams } from '@angular/common/http';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PeriodService } from 'src/app/services/period.service';
 import { TransactionService } from 'src/app/services/transaction.service';
 import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
 import { GenericModalComponent } from '../generic-modal/generic-modal.component';
+import { last, lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-transaction',
@@ -13,10 +14,9 @@ import { GenericModalComponent } from '../generic-modal/generic-modal.component'
 })
 export class TransactionComponent implements OnInit {
 
-  @ViewChild('modalCreate') modalCreate?: GenericModalComponent;
-  @ViewChild('modalEdit') modalEdit?: GenericModalComponent;
-  
-  //Modal
+  // modal
+  @ViewChild('modal') modal?: GenericModalComponent;
+  modalType: string = '';
   modalRef: BsModalRef = new BsModalRef();
 
   // error handling
@@ -25,79 +25,73 @@ export class TransactionComponent implements OnInit {
 
   transactions: any;
   params: HttpParams = new HttpParams();
-  periodId: number = 0;
   period?: any;
   editTransactionId: number = 0;
 
   constructor(private transactionService: TransactionService,
-              private route             : ActivatedRoute,
               private periodService     : PeriodService,
-              private modalService      : BsModalService) { }
+              private modalService      : BsModalService,
+              private router            : Router) { }
 
-  ngOnInit(): void {
-    this.route.queryParams.subscribe(param => {
+  async ngOnInit(): Promise<void> {
 
-      if(Object.keys(param).length != 0 && Object.keys(param)[0] == 'periodId'){
-        this.params = this.params.set('periodId', param['periodId']);
-        this.periodId = param['periodId'];
-        
-        this.periodService.getPeriod(this.periodId).subscribe(res => {
-          this.periodService.periodsBS.next(res.result);
-          this.period = this.periodService.periodsBS;
-        });
+    if(this.periodService.currentPeriodBS.value != null){
+      this.period = this.periodService.currentPeriodBS;
+    }else {
+       this.router.navigate(['/periods']);
+       return;
+    }
+
+    this.params = this.params.set('periodId', this.period?.value.id);
+
+    const getTransactionResponse = await lastValueFrom(this.transactionService.getTransactions(this.params));
+    
+    if(getTransactionResponse.isSuccess){
+      this.transactionService.transactionsBS.next(getTransactionResponse.result);
+      this.transactions = this.transactionService.transactionsBS;
+    }
+
+  }
+
+  async deleteTransaction(id: number){
+    const deleteConfirmation: boolean = confirm('Are you sure you want to delete this transaction?');
+
+    if(deleteConfirmation){
+      const deleteTransactionResponse = await lastValueFrom(this.transactionService.deleteTransaction(id));
+      
+      if(deleteTransactionResponse.isSuccess){
+        // Update Transaction BS
+        const getTransactionsResponse = await lastValueFrom(this.transactionService.getTransactions(this.params));
+        this.transactionService.transactionsBS.next(getTransactionsResponse.result);
+
+        // Update Period BS
+        const getPeriodResponse = await lastValueFrom(this.periodService.getPeriod(this.period?.value.id));
+        this.periodService.currentPeriodBS.next(getPeriodResponse.result);
 
       }else{
-        this.params = new HttpParams();
+        this.errorMsg = true;
+        this.errorMessages.push(deleteTransactionResponse.errorMessages[0]);
       }
-
-      this.transactionService.getTransactions(this.params).subscribe({
-        next: (response) => {
-          if(response.isSuccess){
-            this.transactionService.transactionsBS.next(response.result);
-            this.transactions = this.transactionService.transactionsBS;
-          }
-        }
-      });
-    });
-  }
-
-  deleteTransaction(id: number){
-    const delConfirm: boolean = confirm('Are you sure you want to delete this transaction?');
-
-    if(delConfirm){
-      this.transactionService.deleteTransaction(id).subscribe({
-        next: (response) => {
-          if(response.isSuccess){
-            this.transactionService.getTransactions(this.params).subscribe(res => {
-              this.transactionService.transactionsBS.next(res.result);
-            });
-
-            this.periodService.getPeriod(this.periodId).subscribe(res => {
-              this.periodService.periodsBS.next(res.result);
-            });
-
-          }else{
-            this.errorMsg = true;
-            this.errorMessages.push(response.errorMessages[0]);
-          }
-        }
-      });
     }
   }
 
-  openModalCreate(){
-    if(this.modalCreate && this.modalCreate.template) {
-      this.modalRef = this.modalService.show(this.modalCreate.template);
-      this.modalCreate.hideModal = this.modalRef.hide;
+  async openModal(type: string, id: number){
+
+    if(type == 'Edit'  && id != 0) {
+      const getTransactionResponse = await lastValueFrom(this.transactionService.getTransaction(id));
+      if (getTransactionResponse.isSuccess) {
+        this.transactionService.currentTransactionBS.next(getTransactionResponse.result);
+      }
     }
 
-  }
+    this.modalType = type;
 
-  openModalEdit(id: number){
-    if(this.modalEdit && this.modalEdit.template) {
-      this.modalRef = this.modalService.show(this.modalEdit.template);
-      this.editTransactionId = id;
-      this.modalEdit.hideModal = this.modalRef.hide;
+    if(this.modal && this.modal.template) {
+      this.modalRef = this.modalService.show(this.modal.template);
+      this.modal.hideModal = () => {
+        this.modalType = '';
+        this.modalRef.hide();
+      };
     }
 
   }

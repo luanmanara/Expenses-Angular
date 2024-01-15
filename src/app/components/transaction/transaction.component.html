@@ -1,15 +1,18 @@
 <h1 class="page-title text-center">Transactions</h1>
 
 <div class="d-flex justify-content-between align-items-center">
-    <a class="btn btn-success" *ngIf="period && !period?.value.isClosed" (click)="openModalCreate()">Add a transaction</a>
+    <a class="btn btn-success" *ngIf="period && !period?.value.isClosed" (click)="openModal('Create', 0)">Add a transaction</a>
 
-    <div *ngIf="period" class="row">
+    <div *ngIf="period" class="row m-0">
         <div class="col border"><span class="fw-bold">Balance:</span></div>
         <div class="col border">{{period?.value.balance | currency:'BRL':'symbol'}}</div>
         <div class="w-100"></div>
         <div class="col border"><span class="fw-bold">Salary:</span></div>
         <div class="col border">{{period?.value.salary | currency:'BRL':'symbol'}}</div>
     </div>
+
+    <app-back-button></app-back-button>
+    
 </div>
 
 <br>
@@ -27,8 +30,8 @@
             <th scope="col">Transaction Type</th>
             <th scope="col">Description</th>
             <th scope="col">Date Of Movement</th>
-            <th scope="col" *ngIf="!period?.isClosed"></th>
-            <th scope="col" *ngIf="!period?.isClosed"></th>
+            <th scope="col" *ngIf="!period?.value.isClosed"></th>
+            <th scope="col" *ngIf="!period?.value.isClosed"></th>
         </tr>
     </thead>
     <tbody>
@@ -40,17 +43,14 @@
             <td>{{transaction.transactionName}}</td>
             <td>{{transaction.description}}</td>
             <td>{{transaction.dateOfMovement | date:'dd/MM/YYYY'}}</td>
-            <td *ngIf="!period?.value.isClosed"><a class="btn btn-primary btn-sm" (click)="openModalEdit(transaction.id)">Edit</a></td>
+            <td *ngIf="!period?.value.isClosed"><a class="btn btn-primary btn-sm" (click)="openModal('Edit', transaction.id)">Edit</a></td>
             <td *ngIf="!period?.value.isClosed"><a class="btn btn-danger  btn-sm"
                     (click)="deleteTransaction(transaction.id)">Delete</a></td>
         </tr>
     </tbody>
 </table>
 
-<app-generic-modal #modalCreate [title]="'Create Transaction'">
-    <app-transaction-create [periodId]="periodId"></app-transaction-create>
-</app-generic-modal>
-
-<app-generic-modal #modalEdit [title]="'Edit Transaction'">
-    <app-transaction-edit [transactionId]="editTransactionId"></app-transaction-edit>
+<app-generic-modal #modal [title]="modalType == 'Create' ? 'Create Transaction' : 'Edit Transaction'">
+    <app-transaction-create *ngIf="modalType === 'Create'"></app-transaction-create>
+    <app-transaction-edit   *ngIf="modalType === 'Edit'"></app-transaction-edit>
 </app-generic-modal>

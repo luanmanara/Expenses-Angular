@@ -11,8 +11,8 @@
     <div class="mb-3">
         <label for="periodId" class="form-label">Period</label>
         <select name="periodId" class="form-control" [(ngModel)]="periodId" #transactionPeriodId="ngModel" required>
-            <option *ngFor="let period of periods" [value]="period.id">
-                {{period.id + " - " + (period.month | date:'MMMM')}}
+            <option [value]="period.value?.id" [selected]="true">
+                {{period.value?.id + " - " + (period.value?.month | date:'MMMM')}}
             </option>
         </select>
     </div>

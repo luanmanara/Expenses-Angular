@@ -31,8 +31,7 @@ export class UserLoginComponent implements OnInit {
     this.userService.login(form.value).subscribe({
       next: (response) => {
         if(response.isSuccess){
-          this.userService.currentUserBS.next(response.result);
-          this.userService.isLoggedIn.next(true);
+          this.userService.setCurrentUser(response.result);
           this.router.navigate(['/wallets']);
         }else {
           this.errorMsg = true;

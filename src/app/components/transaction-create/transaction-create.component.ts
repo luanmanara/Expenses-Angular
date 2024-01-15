@@ -1,6 +1,7 @@
 import { HttpParams } from '@angular/common/http';
 import { Component, OnInit, Input } from '@angular/core';
 import { NgForm } from '@angular/forms';
+import { lastValueFrom } from 'rxjs';
 import { PeriodService } from 'src/app/services/period.service';
 import { TransactionService } from 'src/app/services/transaction.service';
 
@@ -11,13 +12,12 @@ import { TransactionService } from 'src/app/services/transaction.service';
 })
 export class TransactionCreateComponent implements OnInit {
 
-  @Input() periodId: number = 0;
-
   value?: number;
   transactionType?: number;
   description?: string;
   dateOfMovement?: Date;
-  periods: any;
+  period: any;
+  periodId: number = 0;
 
   params: HttpParams = new HttpParams();
 
@@ -29,54 +29,36 @@ export class TransactionCreateComponent implements OnInit {
   constructor(private transactionService: TransactionService,
               private periodService     : PeriodService) { }
 
-  ngOnInit(): void {
-    if(!this.periodId) {
-      this.params = this.params.set('isClosed', false);
-      this.periodService.getPeriods(this.params).subscribe({
-        next: (res) => {
-          if(res.isSuccess) {
-            this.periods = res.result;
-          }
-        }
-      });
+  async ngOnInit(): Promise<void> {
+    this.period = this.periodService.currentPeriodBS;
+  }
+
+  async createTransaction(form: NgForm){
+
+    const createTransactionResponse = await lastValueFrom(this.transactionService.createTransaction(form.value));
+
+    if(createTransactionResponse.isSuccess){
+
+      // parameters to search for the period transactions and update BS
+      let transactionParams: HttpParams = new HttpParams();
+      transactionParams = transactionParams.set('periodId', this.periodId);
+
+      // Update Transaction BS
+      const getTransactionsResponse = await lastValueFrom(this.transactionService.getTransactions(transactionParams));
+      this.transactionService.transactionsBS.next(getTransactionsResponse.result);
+
+      // Update Period BS
+      const getPeriodResponse = await lastValueFrom(this.periodService.getPeriod(this.period?.value.id));
+      this.periodService.currentPeriodBS.next(getPeriodResponse.result);
+
+      // handle the success messages
+      this.successMsg = true;
+      setTimeout(() =>{ this.successMsg = false; }, 1000);
+
     }else {
-      this.periodService.getPeriod(this.periodId).subscribe(res => {
-        if(res.isSuccess) {
-          this.periods = [res.result];
-        }
-      });
+      this.errorMsg = true;
+      this.errorMessages.push(createTransactionResponse.errorMessages[0]);          
+      setTimeout(() => { this.errorMsg = false; this.errorMessages.pop(); }, 1000);
     }
   }
-
-  createTransaction(form: NgForm){
-    this.transactionService.createTransaction(form.value).subscribe({
-      next: (response) => {
-        if(response.isSuccess){
-
-          // parameters to search for the period transactions and update BS
-          let transactionParams: HttpParams = new HttpParams();
-          transactionParams = transactionParams.set('periodId', this.periodId);
-          this.transactionService.getTransactions(transactionParams).subscribe(response => {
-            this.transactionService.transactionsBS.next(response.result);
-          });
-
-          this.periodService.getPeriod(this.periodId).subscribe(res => {
-            this.periodService.periodsBS.next(res.result);
-          });
-
-          // handle the success messages
-          this.successMsg = true;
-
-          setTimeout(() =>{ this.successMsg = false; }, 1000);
-
-        }else {
-          this.errorMsg = true;
-          this.errorMessages.push(response.errorMessages[0]);
-          
-          setTimeout(() => { this.errorMsg = false; this.errorMessages.pop(); }, 1000);
-        }
-      }
-    });
-  }
-
 }

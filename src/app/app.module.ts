@@ -4,7 +4,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { DatePipe } from '@angular/common';
 import { NgxMaskDirective, NgxMaskPipe, provideNgxMask } from 'ngx-mask';
 import { FormsModule } from '@angular/forms';
-import { HttpClientModule } from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -33,6 +33,8 @@ import { BsDropdownModule } from 'ngx-bootstrap/dropdown';
 import { TooltipModule } from 'ngx-bootstrap/tooltip';
 import { ModalModule, BsModalService } from 'ngx-bootstrap/modal';
 import { CollapseModule } from 'ngx-bootstrap/collapse';
+import { AuthInterceptor } from './services/auth-interceptor.service';
+import { BackButtonComponent } from './components/back-button/back-button.component';
 
 @NgModule({
   declarations: [
@@ -47,7 +49,8 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
     TransactionEditComponent,
     GenericModalComponent,
     UserLoginComponent,
-    UserRegisterComponent
+    UserRegisterComponent,
+    BackButtonComponent
   ],
   imports: [
     BrowserModule,
@@ -55,14 +58,19 @@ import { CollapseModule } from 'ngx-bootstrap/collapse';
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
-    NgxMaskDirective, 
+    NgxMaskDirective,
     NgxMaskPipe,
     BsDropdownModule.forRoot(),
     TooltipModule.forRoot(),
     ModalModule.forRoot(),
     CollapseModule.forRoot()
   ],
-  providers: [WalletService, PeriodService, TransactionService, UserService, DatePipe, provideNgxMask(), BsModalService],
+  providers: [WalletService, PeriodService, TransactionService, UserService, DatePipe, provideNgxMask(), BsModalService,
+    {
+      provide: HTTP_INTERCEPTORS,
+      useClass: AuthInterceptor,
+      multi: true
+    }],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

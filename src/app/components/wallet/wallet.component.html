@@ -1,5 +1,6 @@
 <h2 class="page-title text-center mt-3">My Wallets</h2>
-<a class="btn btn-success" routerLink="/wallets/create">Add a wallet</a>
+<!-- <a class="btn btn-success" routerLink="/wallets/create">Add a wallet</a> -->
+<a class="btn btn-success" (click)="openModal()">Add a wallet</a>
 <br><br>
 
 <table class="table table-hover">
@@ -12,12 +13,18 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let wallet of wallets;">
+        <tr *ngFor="let wallet of wallets | async;">
             <th scope="row">{{wallet.id}}</th>
             <td>{{wallet.name}}</td>
             <td>{{wallet.saved | currency:'BRL':'symbol'}}</td>
-            <td><a [routerLink]="['/periods']"
-                   [queryParams]= "{ walletId: + wallet.id}" class="btn btn-primary btn-sm">Periods</a></td>
+            <!-- <td><a [routerLink]="['/periods']"
+                   [queryParams]= "{ walletId: + wallet.id}" class="btn btn-primary btn-sm">Periods</a></td> -->
+
+            <td><a (click)="selectWallet(wallet.id)" class="btn btn-primary btn-sm">Periods</a></td>
         </tr>
     </tbody>
 </table>
+
+<app-generic-modal #modal [title]="'Create Wallet'">
+    <app-wallet-create></app-wallet-create>
+</app-generic-modal>

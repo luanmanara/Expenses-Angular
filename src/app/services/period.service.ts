@@ -4,6 +4,7 @@ import { APIResponse } from '../_models/apiresponse';
 import { environment } from 'src/environments/environment';
 import { PeriodUpdateDTO } from '../_models/dto/periodUpdateDTO';
 import { BehaviorSubject } from 'rxjs';
+import { PeriodDTO } from '../_models/dto/periodDTO';
 
 @Injectable({
   providedIn: 'root'
@@ -13,6 +14,7 @@ export class PeriodService {
 
   private apiUrlEndpoint: string = environment.apiUrl + "period/";
   public  periodsBS = new BehaviorSubject<object|null>(null);
+  public  currentPeriodBS = new BehaviorSubject<PeriodDTO|null>(null);
   
   constructor(private http : HttpClient) { }
 
@@ -21,7 +23,7 @@ export class PeriodService {
   }
 
   getPeriod(id: number){
-    return this.http.get<APIResponse<object>>(this.apiUrlEndpoint + id);
+    return this.http.get<APIResponse<PeriodDTO>>(this.apiUrlEndpoint + id);
   }
 
   createPeriod(period : any){

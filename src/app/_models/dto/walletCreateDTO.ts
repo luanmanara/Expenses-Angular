@@ -1,4 +1,5 @@
 export interface WalletCreateDTO{
     name: string,
-    saved: number
+    saved: number,
+    userId: string
 }

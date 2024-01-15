@@ -1,9 +1,13 @@
 import { HttpParams } from '@angular/common/http';
-import { Component, OnInit, TemplateRef, resolveForwardRef } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, TemplateRef, ViewChild, resolveForwardRef } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { PeriodService } from 'src/app/services/period.service';
 import { WalletService } from 'src/app/services/wallet.service';
 import { PeriodUpdateDTO } from 'src/app/_models/dto/periodUpdateDTO';
+import { lastValueFrom } from 'rxjs';
+import { WalletDTO } from 'src/app/_models/dto/walletDTO';
+import { BsModalRef, BsModalService } from 'ngx-bootstrap/modal';
+import { GenericModalComponent } from '../generic-modal/generic-modal.component';
 
 @Component({
   selector: 'app-period',
@@ -11,48 +15,44 @@ import { PeriodUpdateDTO } from 'src/app/_models/dto/periodUpdateDTO';
   styleUrls: ['./period.component.css']
 })
 export class PeriodComponent implements OnInit {
+
+  // modal
+  @ViewChild('modal') modal?: GenericModalComponent;
+  modalRef: BsModalRef = new BsModalRef();
   
   periods : any;
   params: HttpParams = new HttpParams();
-  walletId: number = 0;
+  wallet: any;
 
   constructor(private periodService : PeriodService,
               private walletService : WalletService,
-              private route         : ActivatedRoute) { }
+              private router        : Router,
+              private modalService  : BsModalService) { }
 
-  ngOnInit(): void {
-    this.route.queryParams.subscribe(param => {
+  async ngOnInit(): Promise<void> {
 
-      if(Object.keys(param).length != 0 && Object.keys(param)[0] == 'walletId'){
-        this.params = this.params.set('walletId', param['walletId']);
-        this.walletId = param['walletId'];
-      }else{
-        this.params = new HttpParams();
+      if(this.walletService.currentWalletBS.value != null){
+        this.wallet = this.walletService.currentWalletBS.value;
+      }else {
+        this.router.navigate(['/wallets']);
+        return;
       }
 
-      this.periodService.getPeriods(this.params).subscribe({
-        next: (response) => {
-          if(response.isSuccess){
-            this.periods = response.result;
-          }
-        },
-        error: (e) => console.error(e),
-        complete: () => {
-          this.periods.forEach((element: { walletId: number; }, key: number) => {
-            this.walletService.getWallet(element.walletId).subscribe({
-              next: (response) => {
-                this.periods[key].wallet = response.result;
-              }
-            })
-          });
-        }
-      });
+      this.params = this.params.set('walletId', this.wallet.id);
 
-    });
-    
+      const getPeriodsResponse = await lastValueFrom(this.periodService.getPeriods(this.params));
+
+      if(getPeriodsResponse.isSuccess){
+        this.periodService.periodsBS.next(getPeriodsResponse.result);
+        this.periods = this.periodService.periodsBS;
+
+        this.periods?.value.forEach((element: {wallet : WalletDTO}, key: number) => {
+          element.wallet = this.wallet;
+        });
+      }
   }
 
-  closePeriod(id: number){
+  async closePeriod(id: number){
 
     const delConfirm: boolean = confirm('Are you sure you want to close this period?');
 
@@ -61,14 +61,27 @@ export class PeriodComponent implements OnInit {
         id: id,
         isClosed: true
       };
-  
-      this.periodService.closePeriod(id, model).subscribe({
-        next: (response) => {
-          if(response.isSuccess){
-            this.ngOnInit();
-          }
-        }
-      });
+
+      const closePeriodResponse = await lastValueFrom(this.periodService.closePeriod(id, model));
+    
+      if(closePeriodResponse.isSuccess){
+        this.ngOnInit();
+      }
+    }
+  }
+
+  async selectPeriod(id: number){
+    const getPeriodResponse = await lastValueFrom(this.periodService.getPeriod(id));
+    if(getPeriodResponse.isSuccess){
+      this.periodService.currentPeriodBS.next(getPeriodResponse.result);
+      this.router.navigate(['/transactions']);
+    }
+  }
+
+  async openModal(){
+    if(this.modal && this.modal.template) {
+      this.modalRef = this.modalService.show(this.modal.template);
+      this.modal.hideModal = this.modalRef.hide;
     }
   }
 

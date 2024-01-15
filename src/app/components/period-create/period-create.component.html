@@ -1,7 +1,3 @@
-<h1 class="page-title">Create Period</h1>
-<a class="btn btn-primary btn-sm" routerLink="/periods" [queryParams]= "{ walletId: + walletId}">Go back!</a>
-<br><br>
-
 <div class="alert alert-danger" *ngIf="errorMsg">
     Error while creating - {{errorMessages[0]}}
 </div>
@@ -15,7 +11,7 @@
     <div class="mb-3">
         <label for="walletId" class="form-label">Wallet</label>
         <select name="walletId" class="form-control" [(ngModel)]="walletId" #periodWalletId="ngModel" required>
-            <option *ngFor="let wallet of wallets" [value]="wallet.id">
+            <option *ngFor="let wallet of wallets | async" [value]="wallet.id">
                 {{wallet.id + " - " + wallet.name}}
             </option>
         </select>

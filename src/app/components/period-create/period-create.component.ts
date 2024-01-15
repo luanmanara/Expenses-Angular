@@ -2,6 +2,7 @@ import { HttpParams } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { lastValueFrom } from 'rxjs';
 import { PeriodService } from 'src/app/services/period.service';
 import { UserService } from 'src/app/services/user.service';
 import { WalletService } from 'src/app/services/wallet.service';
@@ -24,45 +25,32 @@ export class PeriodCreateComponent implements OnInit {
   successMsg: boolean = false;
 
   constructor(private periodService: PeriodService,
-              private walletService: WalletService,
-              private route        : ActivatedRoute,
-              private userService  : UserService) { }
+              private walletService: WalletService) { }
 
   ngOnInit(): void {
-    if (this.userService.currentUserBS.value) {
-      this.httpParams = this.httpParams.set("userId", this.userService.currentUserBS.value?.user.id);
+    this.wallets = this.walletService.walletsBS;
+    this.walletId = this.walletService.currentWalletBS.value?.id??0;
+  }
+
+  async createPeriod(form: NgForm) {
+    const createPeriodResponse = await lastValueFrom(this.periodService.createPeriod(form.value));
+    if (createPeriodResponse.isSuccess) {
+
+      this.httpParams = this.httpParams.set('walletId', this.walletId);
+
+      const getPeriodsResponse = await lastValueFrom(this.periodService.getPeriods(this.httpParams));
+
+      if(getPeriodsResponse.isSuccess){
+        this.periodService.periodsBS.next(getPeriodsResponse.result);
+      }
       
-      this.walletService.getWallets(this.httpParams).subscribe({
-        next: (response) => {
-          this.wallets = response.result;
-        },
-        complete: () => {
-          this.route.queryParams.subscribe(param => {
-            this.walletId = param['walletId'];
-          });
-        }
-      });
+      this.successMsg = true;
+      setTimeout(() => { this.successMsg = false; }, 1000);
+
+    } else {
+      this.errorMsg = true;
+      this.errorMessages.push(createPeriodResponse.errorMessages[0]);
+      setTimeout(() => { this.errorMsg = false; this.errorMessages.pop(); }, 1000);
     }
   }
-
-  createPeriod(form: NgForm){
-    this.periodService.createPeriod(form.value).subscribe({
-      next: (response) => {
-        if(response.isSuccess){
-          this.successMsg = true;
-          setTimeout(()=>{
-            this.successMsg = false;
-          }, 1000);
-        }else {
-          this.errorMsg = true;
-          this.errorMessages.push(response.errorMessages[0]);
-          setTimeout(()=>{
-            this.errorMsg = false;
-            this.errorMessages.pop();
-          }, 1000);
-        }
-      }
-    });
-  }
-
 }

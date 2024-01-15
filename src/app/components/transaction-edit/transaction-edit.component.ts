@@ -1,8 +1,8 @@
 import { DatePipe } from '@angular/common';
 import { HttpParams } from '@angular/common/http';
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { NgForm } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { lastValueFrom } from 'rxjs';
 import { TransactionUpdateDTO } from 'src/app/_models/dto/transactionUpdateDTO';
 import { PeriodService } from 'src/app/services/period.service';
 import { TransactionService } from 'src/app/services/transaction.service';
@@ -12,7 +12,7 @@ import { TransactionService } from 'src/app/services/transaction.service';
   templateUrl: './transaction-edit.component.html',
   styleUrls: ['./transaction-edit.component.css']
 })
-export class TransactionEditComponent implements OnInit, OnChanges {
+export class TransactionEditComponent implements OnInit {
 
   @Input() transactionId: number = 0;
 
@@ -23,6 +23,7 @@ export class TransactionEditComponent implements OnInit, OnChanges {
   description?: string;
   dateOfMovement?: string;
   period: any = {id: 0, month: ''};
+  transaction: any;
 
   // error validations
   errorMsg: boolean = false;
@@ -30,82 +31,59 @@ export class TransactionEditComponent implements OnInit, OnChanges {
   errorMessages: Array<string> = [];
 
   constructor(private transactionService: TransactionService,
-              private route             : ActivatedRoute,
               private datePipe          : DatePipe,
-              private periodService     : PeriodService,
-              private router: Router) { }
+              private periodService     : PeriodService) { }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if(changes['transactionId']){
-      this.getTransaction(this.transactionId);
-    }
-  }
 
   ngOnInit(): void {
-  }
 
-  updateTransaction(form: NgForm){
-    const model: TransactionUpdateDTO = form.value;
-    this.transactionService.updateTransaction(model.id, model).subscribe({
-      next: (response) => {
-        if(response.isSuccess){
-          
-          // parameters to search for the period transactions and update BS
-          let transactionParams: HttpParams = new HttpParams();
-          transactionParams = transactionParams.set('periodId', this.periodId);
-          this.transactionService.getTransactions(transactionParams).subscribe(response => {
-            this.transactionService.transactionsBS.next(response.result);
-          });
+    if(this.transactionService.currentTransactionBS.value != null && this.periodService.currentPeriodBS.value != null){
 
-          this.periodService.getPeriod(this.periodId).subscribe(res => {
-            this.periodService.periodsBS.next(res.result);
-          });
+      const currentTransactionBSValue = this.transactionService.currentTransactionBS.value;
+      const currentPeriodBSValue      = this.periodService.currentPeriodBS.value;
 
-          this.successMsg = true;
-          
-          setTimeout(() =>{ this.successMsg = false; }, 1000);
+      this.id = currentTransactionBSValue.id;
+      this.periodId = currentTransactionBSValue.periodId;
+      this.value = currentTransactionBSValue.value;
+      this.transactionType = currentTransactionBSValue.transactionType;
+      this.description = currentTransactionBSValue.description;
+      let date = new Date(currentTransactionBSValue.dateOfMovement);
 
-        }else {
-          this.errorMsg = true;
-          this.errorMessages.push(response.errorMessages[0]);
+      // format date
+      let dateString = this.datePipe.transform(date, "yyyy-MM-dd");
+      this.dateOfMovement = dateString != null ? dateString : '';
 
-          setTimeout(() => { this.errorMsg = false; this.errorMessages.pop(); }, 1000);
-        }
-      }
-    });
-  }
-
-  getTransaction(id: number) {
-    if(id){
-      this.transactionService.getTransaction(id).subscribe({
-        next: (response) => {
-          if(response.isSuccess && response.statusCode == 200){
-            this.id = response.result.id;
-            this.periodId = response.result.periodId;
-            this.value = response.result.value;
-            this.transactionType = response.result.transactionType;
-            this.description = response.result.description;
-            
-            // format date
-            let date = new Date(response.result.dateOfMovement);
-            let dateString = this.datePipe.transform(date, "yyyy-MM-dd");
-
-            if(dateString != null){
-              this.dateOfMovement =  dateString;
-            }
-          }
-        },
-        complete: () => {
-          if(this.periodId != undefined)
-            this.getPeriod(this.periodId);
-        }
-      });
+      this.period = currentPeriodBSValue;
     }
   }
 
-  getPeriod(periodId: number){
-    this.periodService.getPeriod(periodId).subscribe(res => {
-      this.period = res.result;
-    });
+  async updateTransaction(form: NgForm){
+    const model: TransactionUpdateDTO = form.value;
+    const updateTransactionResponse = await lastValueFrom(this.transactionService.updateTransaction(model.id, model));
+
+    if(updateTransactionResponse.isSuccess){
+      
+      // parameters to search for the period transactions and update BS
+      let transactionParams: HttpParams = new HttpParams();
+      transactionParams = transactionParams.set('periodId', this.period.id);
+
+      // Update Transaction BS
+      const getTransactionsResponse = await lastValueFrom(this.transactionService.getTransactions(transactionParams));
+      this.transactionService.transactionsBS.next(getTransactionsResponse.result);
+
+      // Update Period BS
+      const getPeriodResponse = await lastValueFrom(this.periodService.getPeriod(this.period.id));
+      this.periodService.currentPeriodBS.next(getPeriodResponse.result);
+
+      this.successMsg = true;
+      
+      setTimeout(() =>{ this.successMsg = false; }, 1000);
+
+    }else {
+      this.errorMsg = true;
+      this.errorMessages.push(updateTransactionResponse.errorMessages[0]);
+
+      setTimeout(() => { this.errorMsg = false; this.errorMessages.pop(); }, 1000);
+    }
   }
 }

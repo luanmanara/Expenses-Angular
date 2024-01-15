@@ -1,6 +1,9 @@
 <h1 class="page-title text-center">Periods</h1>
-<a class="btn btn-success" [routerLink]="['/periods/create']"
-    [queryParams]="walletId != 0 ? { walletId: + walletId } : {}">Add a period</a>
+<div class="d-flex justify-content-between align-items-center">
+    <!-- <a class="btn btn-success" [routerLink]="['/periods/create']">Add a period</a> -->
+    <a class="btn btn-success" (click)="openModal()">Add a period</a>
+    <app-back-button></app-back-button>
+</div>
     
 <br><br>
 
@@ -18,17 +21,19 @@
         </tr>
     </thead>
     <tbody>
-        <tr *ngFor="let period of periods;">
+        <tr *ngFor="let period of periods | async;">
             <th scope="row">{{period.id}}</th>
             <td>{{period.month | date:'MMMM'}}</td>
             <td>{{period.wallet?.name}}</td>
             <td>{{period.salary | currency:'BRL':'symbol'}}</td>
             <td>{{period.balance | currency:'BRL':'symbol'}}</td>
             <td>{{period.isClosed ? 'Yes': 'No'}}</td>
-            <td><a [routerLink]="['/transactions']" [queryParams]="{ periodId: + period.id}"
-                    class="btn btn-primary btn-sm">Transactions</a></td>
-            <td><a (click)="closePeriod(period.id)" *ngIf="!period.isClosed" class="btn btn-danger btn-sm">Close</a>
-            </td>
+            <td><a (click)="selectPeriod(period.id)" class="btn btn-primary btn-sm">Transactions</a></td>
+            <td><a (click)="closePeriod(period.id)" *ngIf="!period.isClosed" class="btn btn-danger btn-sm">Close</a></td>
         </tr>
     </tbody>
 </table>
+
+<app-generic-modal #modal [title]="'Create Period'">
+    <app-period-create></app-period-create>
+</app-generic-modal>

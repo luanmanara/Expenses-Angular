@@ -13,15 +13,16 @@ export class TransactionService {
 
   private apiUrlEndpoint: string = environment.apiUrl + "transaction/";
   public  transactionsBS = new BehaviorSubject<object|null>(null);
+  public  currentTransactionBS = new BehaviorSubject<TransactionDTO|null>(null);
   
   constructor(private http : HttpClient) { }
 
-  getTransactions(params: HttpParams){
-    return this.http.get<APIResponse<object>>(this.apiUrlEndpoint, {params});
-  }
-
   getTransaction(id: number){
     return this.http.get<APIResponse<TransactionDTO>>(this.apiUrlEndpoint + id);
+  }
+
+  getTransactions(params: HttpParams){
+    return this.http.get<APIResponse<object>>(this.apiUrlEndpoint, {params});
   }
 
   createTransaction(transaction : any){
